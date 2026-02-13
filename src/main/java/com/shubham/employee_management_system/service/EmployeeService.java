@@ -1,6 +1,7 @@
 package com.shubham.employee_management_system.service;
 
 import com.shubham.employee_management_system.entity.Employee;
+import com.shubham.employee_management_system.exception.ResourceNotFoundException;
 import com.shubham.employee_management_system.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,16 +21,15 @@ public class EmployeeService {
 	}
 	
 	public Employee updateEmployee(Long id, Employee newEmployee) {
-		Employee existing = repository.findById(id).orElse(null);
+		Employee existing = repository.findById(id)
+				.orElseThrow(() ->
+					new ResourceNotFoundException("Employee not found with id " + id));
 		
-		if(existing != null) {
 			existing.setName(newEmployee.getName());
 			existing.setEmail(newEmployee.getEmail());
 			existing.setSalary(newEmployee.getSalary());
+			
 			return repository.save(existing);
-		}
-		
-		return null;
 	}
 	
 	public List<Employee> getAllEmployees() {
@@ -37,10 +37,16 @@ public class EmployeeService {
 	}
 	
 	public Employee getEmployeeById(Long id) {
-		return repository.findById(id).orElse(null);
+		return repository.findById(id)
+				.orElseThrow(() ->
+					new ResourceNotFoundException("Employee not found with id " + id));
 	}
 	
 	public void deleteEmployee(Long id) {
-		repository.deleteById(id);
+		Employee existing = repository.findById(id)
+				.orElseThrow(() ->
+						new ResourceNotFoundException("Employee not found with id " + id));
+		
+		repository.delete(existing);
 	}
 }
